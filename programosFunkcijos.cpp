@@ -82,7 +82,7 @@ string zodzioTaisymas(string &zod){
     std::wstring wresult;
     
     for(wchar_t c: wzod){
-        c = towupper(c);
+        c = towlower(c);
         if (std::isalpha(c, loc)){  
             wresult += c;
         }
