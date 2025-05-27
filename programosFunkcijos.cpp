@@ -90,3 +90,24 @@ string zodzioTaisymas(string &zod){
 
     return converter.to_bytes(wresult);
 }
+
+vector<string> nuoroduFailas(){
+    ifstream nuoroduFail("https://data.iana.org/TLD/tlds-alpha-by-domain.txt");
+    vector<string> nuoroduPabaigos;
+    string nuorodosPabaiga;
+    getline(nuoroduFail, nuorodosPabaiga); //pirmą eilutę praleidžia, nes ten komentaras
+    while(getline(nuoroduFail, nuorodosPabaiga)){
+        nuoroduPabaigos.push_back(nuorodosPabaiga);
+    }
+    return nuoroduPabaigos;
+}
+
+bool arNuoroda(string zodis){
+    vector<string> nuoroduPabaigos = nuoroduFailas();
+    string zodzioGalas = zodis.substr(zodis.find_last_of("."));
+    for(string s : nuoroduPabaigos){
+        if(zodzioGalas == s){
+            return true;
+        }
+    }
+}
