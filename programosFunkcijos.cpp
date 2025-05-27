@@ -17,8 +17,8 @@ void nuskaitytiFaila(string fail, map<string, zodzioInfo>& zodziai){
             istringstream eilute(eilut);
             string zodis;
             while(eilute >> zodis){
-                 zodziai[zodis].pasikartojimai++;                   
-                zodziai[zodis].eilutes.push_back(eilutesIndex); 
+                zodziai[zodzioTaisymas(zodis)].pasikartojimai++;                   
+                zodziai[zodzioTaisymas(zodis)].eilutes.push_back(eilutesIndex);     
             }
             eilutesIndex++;
         }
@@ -72,4 +72,21 @@ string pasirinktiFaila(){
             throw;
         }
     }
+}
+
+string zodzioTaisymas(string &zod){
+    std::locale loc("lt_LT.UTF-8");
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+
+    std::wstring wzod = converter.from_bytes(zod);
+    std::wstring wresult;
+    
+    for(wchar_t c: wzod){
+        c = towupper(c);
+        if (std::isalpha(c, loc)){  
+            wresult += c;
+        }
+    }
+
+    return converter.to_bytes(wresult);
 }

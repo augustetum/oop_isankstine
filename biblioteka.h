@@ -4,6 +4,11 @@
 #include <fstream>
 #include <unordered_set>
 #include <sstream>
+#include <cstring>
+#include <locale>
+#include <unicode/uchar.h>
+#include <cwctype>
+#include <codecvt>
 
 using std::cout;
 using std::cin;
@@ -21,3 +26,4 @@ struct zodzioInfo {
 
 string pasirinktiFaila();
 void nuskaitytiFaila(string fail, map<string, zodzioInfo>& zodziai);
+string zodzioTaisymas(string &zod);

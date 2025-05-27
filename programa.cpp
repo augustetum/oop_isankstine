@@ -5,6 +5,10 @@ int main(){
     string pasirinktasFailas = pasirinktiFaila();
     nuskaitytiFaila(pasirinktasFailas, zodziai);
     for (auto i : zodziai){
-        cout << i.first << " " << i.second.pasikartojimai << endl;
+        cout << i.first << " " << i.second.pasikartojimai <<  " Eilutėse: ";
+        for(int i : i.second.eilutes){
+            cout << i << ", ";
+        }
+        cout << endl;
     }
 }
