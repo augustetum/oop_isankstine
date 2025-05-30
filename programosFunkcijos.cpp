@@ -42,7 +42,7 @@ string pasirinktiFaila(){
             #endif
             ifstream tempFail("temp.txt");
             vector<string> failuPav;
-            std::unordered_set<string> nenorimiFailai = {"rezultatai.txt", "temp.txt"};
+            std::unordered_set<string> nenorimiFailai = {"rezultatai.txt", "temp.txt", "link_endings.txt"};
             string failoPav;
             while(getline(tempFail, failoPav)){
                 if (nenorimiFailai.find(failoPav) == nenorimiFailai.end()) {
