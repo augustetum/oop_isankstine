@@ -1,6 +1,6 @@
 #include "biblioteka.h"
 
-void nuskaitytiFaila(string fail, map<string, zodzioInfo>& zodziai){
+void nuskaitytiFaila(string fail, map<string, zodzioInfo>& zodziai, vector<string>& nuorodos){
     string eilut;
     int pazymys;
     std::stringstream buferis;
@@ -17,8 +17,12 @@ void nuskaitytiFaila(string fail, map<string, zodzioInfo>& zodziai){
             istringstream eilute(eilut);
             string zodis;
             while(eilute >> zodis){
-                zodziai[zodzioTaisymas(zodis)].pasikartojimai++;                   
-                zodziai[zodzioTaisymas(zodis)].eilutes.push_back(eilutesIndex);     
+                if(arNuoroda(zodis)){
+                    nuorodos.push_back(zodis);
+                } else {
+                    zodziai[zodzioTaisymas(zodis)].pasikartojimai++;                   
+                    zodziai[zodzioTaisymas(zodis)].eilutes.push_back(eilutesIndex);     
+                }
             }
             eilutesIndex++;
         }
@@ -92,8 +96,12 @@ string zodzioTaisymas(string &zod){
 }
 
 vector<string> nuoroduFailas(){
-    ifstream nuoroduFail("https://data.iana.org/TLD/tlds-alpha-by-domain.txt");
+    ifstream nuoroduFail("link_endings.txt");
     vector<string> nuoroduPabaigos;
+
+    if (!nuoroduFail.is_open()) {
+        cout << "Nuorodų failas neatsidarė" << endl;
+    }
     string nuorodosPabaiga;
     getline(nuoroduFail, nuorodosPabaiga); //pirmą eilutę praleidžia, nes ten komentaras
     while(getline(nuoroduFail, nuorodosPabaiga)){
@@ -103,11 +111,36 @@ vector<string> nuoroduFailas(){
 }
 
 bool arNuoroda(string zodis){
+    if (zodis.find("http://") == 0 || zodis.find("https://") == 0 || 
+        zodis.find("www.") == 0 || zodis.find("ftp://") == 0) {
+        return true;
+    }
+    
+    size_t taskoPozicija = zodis.find_last_of(".");
+    if (taskoPozicija == string::npos || taskoPozicija == zodis.length() - 1) {
+        return false;
+    }
+    
+    string poTasko = zodis.substr(taskoPozicija + 1);
+
+    size_t slashPozicija = poTasko.find('/');
+    string zodzioGalas;
+    
+    if (slashPozicija != string::npos) {
+        zodzioGalas = poTasko.substr(0, slashPozicija);
+    } else {
+        zodzioGalas = poTasko;
+    }
+    
+    std::transform(zodzioGalas.begin(), zodzioGalas.end(), zodzioGalas.begin(), ::tolower);
+
     vector<string> nuoroduPabaigos = nuoroduFailas();
-    string zodzioGalas = zodis.substr(zodis.find_last_of("."));
-    for(string s : nuoroduPabaigos){
-        if(zodzioGalas == s){
+    for(const string& s : nuoroduPabaigos){
+        string lowerS = s;
+        std::transform(lowerS.begin(), lowerS.end(), lowerS.begin(), ::tolower);
+        if(zodzioGalas == lowerS){
             return true;
         }
     }
+    return false;
 }

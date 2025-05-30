@@ -25,5 +25,7 @@ struct zodzioInfo {
 };
 
 string pasirinktiFaila();
-void nuskaitytiFaila(string fail, map<string, zodzioInfo>& zodziai);
+void nuskaitytiFaila(string fail, map<string, zodzioInfo>& zodziai, vector<string>& nuorodos);
 string zodzioTaisymas(string &zod);
+vector<string> nuoroduFailas();
+bool arNuoroda(string zodis);

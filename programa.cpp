@@ -3,7 +3,8 @@
 int main(){
     map<string, zodzioInfo> zodziai;
     string pasirinktasFailas = pasirinktiFaila();
-    nuskaitytiFaila(pasirinktasFailas, zodziai);
+    vector<string> nuorodos;
+    nuskaitytiFaila(pasirinktasFailas, zodziai, nuorodos);
     for (auto i : zodziai){
         cout << i.first << " " << i.second.pasikartojimai <<  " Eilutėse: ";
          cout << i.second.eilutes[0];
@@ -12,5 +13,9 @@ int main(){
             cout << i.second.eilutes[x];
         }
         cout << endl;
+    }
+    cout << "--------------NUORODOS-------------"<<endl;
+    for(auto i : nuorodos){
+        cout << i << endl;
     }
 }
