@@ -17,11 +17,14 @@ void nuskaitytiFaila(string fail, map<string, zodzioInfo>& zodziai, vector<strin
             istringstream eilute(eilut);
             string zodis;
             while(eilute >> zodis){
-                if(arNuoroda(zodis)){
-                    nuorodos.push_back(zodis);
-                } else {
-                    zodziai[zodzioTaisymas(zodis)].pasikartojimai++;                   
-                    zodziai[zodzioTaisymas(zodis)].eilutes.push_back(eilutesIndex);     
+                string zod = zodzioTaisymas(zodis);
+                if(!zod.empty()){
+                    if (arNuoroda(zodis)){
+                        nuorodos.push_back(zodis);
+                    } else {
+                        zodziai[zod].pasikartojimai++;                   
+                        zodziai[zod].eilutes.push_back(eilutesIndex);     
+                    }
                 }
             }
             eilutesIndex++;
