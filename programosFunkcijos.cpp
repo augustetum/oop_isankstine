@@ -144,3 +144,54 @@ bool arNuoroda(string zodis){
     }
     return false;
 }
+
+int skaiciuotiPlotiFormat(const std::string& str) {
+    int width = 0;
+    for (char c : str) {
+        if ((c & 0xC0) != 0x80) {
+            ++width;
+        }
+    }
+    return width;
+}
+
+void isvestiFaila(map<string, zodzioInfo>& zodziai, vector<string>& nuorodos){
+    std::ostringstream buferis;
+
+    const int col1_width = 25;
+    const int col2_width = 8;
+
+    buferis << "Žodis" << std::string(col1_width - 5, ' ')
+            << "Kartai" << std::string(col2_width - 6, ' ')
+            << "Eilutės" << std::endl;
+
+    buferis << std::string(70, '-') << std::endl;
+
+    for (const auto& i : zodziai) {
+        std::string zodis = i.first;
+        int plotis = skaiciuotiPlotiFormat(zodis);
+        buferis << zodis << std::string(col1_width - plotis, ' ');
+
+        std::string kiek = std::to_string(i.second.pasikartojimai);
+        buferis << kiek << std::string(col2_width - kiek.length(), ' ');
+
+        for (size_t x = 0; x < i.second.eilutes.size(); ++x) {
+            if (x > 0) buferis << ", ";
+            buferis << i.second.eilutes[x];
+        }
+
+        buferis << std::endl;
+    }
+
+    buferis << std::endl
+            << std::string(25, '-') << "NUORODOS" << std::string(25, '-') << std::endl;
+
+    for (const auto& i : nuorodos) {
+        buferis << i << std::endl;
+    }
+
+    std::ofstream failas1("rezultatai.txt");
+    failas1 << buferis.str();
+    failas1.close();
+}
+
