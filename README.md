@@ -8,4 +8,4 @@ Programa skirta žodžių suradimui tekste bei tekste esančių nuorodų išrink
 make run
 ````
 4. Pasirinkite norimą failą
-5. Reazultatai pasirodys atskirame faile pavadinimu rezultatai.txt, kuris atsiras repozitorijos direktorijoje.
+5. Reazultatai pasirodys atskiruose failuose pavadinimu rezultatai.txt (žodžiai ir jų pasikartojimai), nuorodos.txt (tekste rastos nuorodos), cross-reference.txt (tekste rasti žodžiai bei atitinkamos eilutės) kurie atsiras repozitorijos direktorijoje.

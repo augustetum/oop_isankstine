@@ -1,34 +1,41 @@
 #include "biblioteka.h"
 
+vector<string> nuoroduPabaigos = nuoroduFailas();
+
 void nuskaitytiFaila(string fail, map<string, zodzioInfo>& zodziai, vector<string>& nuorodos){
     string eilut;
     int pazymys;
-    std::stringstream buferis;
     ifstream failas(fail);
         if (!failas.is_open()){
             throw std::runtime_error("Failo nepavyko atidaryti arba jis neegzistuoja šiame aplankale");
         }
 
-        buferis << failas.rdbuf();
-        failas.close();
-
         int eilutesIndex = 1;
-        while(getline(buferis, eilut)){
+        while(getline(failas, eilut)){
             istringstream eilute(eilut);
             string zodis;
             while(eilute >> zodis){
-                string zod = zodzioTaisymas(zodis);
-                if(!zod.empty()){
+                if(!zodis.empty()){
                     if (arNuoroda(zodis)){
+                        while (!zodis.empty() && ispunct(zodis.front()) && zodis.front() != '.') {
+                            zodis.erase(0, 1);
+                        }
+                        while (!zodis.empty() && ispunct(zodis.back()) && zodis.back() != '/') {
+                            zodis.pop_back();
+                        }
                         nuorodos.push_back(zodis);
                     } else {
-                        zodziai[zod].pasikartojimai++;                   
-                        zodziai[zod].eilutes.push_back(eilutesIndex);     
-                    }
+                        string zod = zodzioTaisymas(zodis);
+                        if(!zod.empty()){
+                            zodziai[zod].pasikartojimai++;                   
+                            zodziai[zod].eilutes.push_back(eilutesIndex);     
+                        }
+                        }
                 }
             }
             eilutesIndex++;
         }
+        failas.close();
 }
 
 string pasirinktiFaila(){
@@ -45,7 +52,7 @@ string pasirinktiFaila(){
             #endif
             ifstream tempFail("temp.txt");
             vector<string> failuPav;
-            std::unordered_set<string> nenorimiFailai = {"rezultatai.txt", "temp.txt", "link_endings.txt"};
+            std::unordered_set<string> nenorimiFailai = {"rezultatai.txt", "temp.txt", "link_endings.txt", "nuorodos.txt", "cross-reference.txt"};
             string failoPav;
             while(getline(tempFail, failoPav)){
                 if (nenorimiFailai.find(failoPav) == nenorimiFailai.end()) {
@@ -81,21 +88,21 @@ string pasirinktiFaila(){
     }
 }
 
-string zodzioTaisymas(string &zod){
-    std::locale loc("lt_LT.UTF-8");
+std::string zodzioTaisymas(std::string &zod) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    std::wstring zod_w = converter.from_bytes(zod); //convertina is UTF-8 i wstring
 
-    std::wstring wzod = converter.from_bytes(zod);
-    std::wstring wresult;
-    
-    for(wchar_t c: wzod){
+    std::wstring nepageidaujami = L"'-=+@#$%*()±•/{}[]°′″≥ⓘ–—•−©·。€„“";
+    std::wstring rez_w;
+
+    for (wchar_t c : zod_w) {
         c = towlower(c);
-        if (std::isalpha(c, loc)){  
-            wresult += c;
+        if (!iswpunct(c) && !iswdigit(c) && nepageidaujami.find(c) == std::wstring::npos) {
+            rez_w += c;
         }
     }
 
-    return converter.to_bytes(wresult);
+    return converter.to_bytes(rez_w);
 }
 
 vector<string> nuoroduFailas(){
@@ -114,9 +121,20 @@ vector<string> nuoroduFailas(){
 }
 
 bool arNuoroda(string zodis){
+    while (!zodis.empty() && ispunct(zodis.front()) && zodis.front() != '.') {
+        zodis.erase(0, 1);
+    }
+    while (!zodis.empty() && ispunct(zodis.back()) && zodis.back() != '/') {
+        zodis.pop_back();
+    }
+
     if (zodis.find("http://") == 0 || zodis.find("https://") == 0 || 
         zodis.find("www.") == 0 || zodis.find("ftp://") == 0) {
         return true;
+    }
+
+    if (zodis.find(".") == 0){ //kai prasideda tašku
+        return false;
     }
     
     size_t taskoPozicija = zodis.find_last_of(".");
@@ -136,8 +154,6 @@ bool arNuoroda(string zodis){
     }
     
     std::transform(zodzioGalas.begin(), zodzioGalas.end(), zodzioGalas.begin(), ::tolower);
-
-    vector<string> nuoroduPabaigos = nuoroduFailas();
     for(const string& s : nuoroduPabaigos){
         string lowerS = s;
         std::transform(lowerS.begin(), lowerS.end(), lowerS.begin(), ::tolower);
@@ -148,53 +164,45 @@ bool arNuoroda(string zodis){
     return false;
 }
 
-int skaiciuotiPlotiFormat(const std::string& str) {
-    int width = 0;
-    for (char c : str) {
-        if ((c & 0xC0) != 0x80) {
-            ++width;
-        }
-    }
-    return width;
-}
-
 void isvestiFaila(map<string, zodzioInfo>& zodziai, vector<string>& nuorodos){
-    std::ostringstream buferis;
+    std::ofstream failas1("rezultatai.txt");
+    std::ofstream failas2("cross-reference.txt");
+    std::ofstream failas3("nuorodos.txt");
 
-    const int col1_width = 25;
-    const int col2_width = 8;
+    if(!failas1.is_open() || !failas2.is_open() || !failas3.is_open()) {
+        std::cerr << "Nepavyko atidaryti rezultatų failo rašymui." << std::endl;
+        return;
+    }
 
-    buferis << "Žodis" << std::string(col1_width - 5, ' ')
-            << "Kartai" << std::string(col2_width - 6, ' ')
-            << "Eilutės" << std::endl;
-
-    buferis << std::string(70, '-') << std::endl;
+    failas1 << "Pasikartojimai\tŽodis\t" << std::endl;
+    failas1 << "----------------------------------------------------------------------" << std::endl;
 
     for (const auto& i : zodziai) {
-        std::string zodis = i.first;
-        int plotis = skaiciuotiPlotiFormat(zodis);
-        buferis << zodis << std::string(col1_width - plotis, ' ');
+        failas1 << i.second.pasikartojimai << "\t" << i.first << "\t";
+        failas1 << endl;
+    }
 
-        std::string kiek = std::to_string(i.second.pasikartojimai);
-        buferis << kiek << std::string(col2_width - kiek.length(), ' ');
-
+    failas2 << "Žodis\tEilutės\t" << std::endl;
+    failas2 << "----------------------------------------------------------------------" << std::endl;
+    for (const auto& i : zodziai) {
+        failas2 << std::left << std::setw(20) << i.first;
         for (size_t x = 0; x < i.second.eilutes.size(); ++x) {
-            if (x > 0) buferis << ", ";
-            buferis << i.second.eilutes[x];
+            if (x > 0) failas2 << ", ";
+            failas2 << i.second.eilutes[x];
         }
-
-        buferis << std::endl;
+        failas2 << endl;
     }
 
-    buferis << std::endl
-            << std::string(25, '-') << "NUORODOS" << std::string(25, '-') << std::endl;
-
-    for (const auto& i : nuorodos) {
-        buferis << i << std::endl;
+    failas3 << "NUORODOS:" << std::endl;
+    for (const auto& nuoroda : nuorodos) {
+        failas3 << nuoroda << endl;
     }
 
-    std::ofstream failas1("rezultatai.txt");
-    failas1 << buferis.str();
     failas1.close();
+    failas2.close();
+    failas3.close();
 }
+
+
+
 
