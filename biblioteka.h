@@ -30,3 +30,4 @@ string zodzioTaisymas(string &zod);
 vector<string> nuoroduFailas();
 bool arNuoroda(string zodis);
 void isvestiFaila(map<string, zodzioInfo>& zodziai, vector<string>& nuorodos);
+bool towChecker(const string& zod);

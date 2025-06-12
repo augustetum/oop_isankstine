@@ -1,6 +1,8 @@
 #include "biblioteka.h"
 
 vector<string> nuoroduPabaigos = nuoroduFailas();
+map<string, zodzioInfo> zodziaiSuTow;
+int towCount = 0;
 
 void nuskaitytiFaila(string fail, map<string, zodzioInfo>& zodziai, vector<string>& nuorodos){
     string eilut;
@@ -26,6 +28,10 @@ void nuskaitytiFaila(string fail, map<string, zodzioInfo>& zodziai, vector<strin
                         nuorodos.push_back(zodis);
                     } else {
                         string zod = zodzioTaisymas(zodis);
+                        if(towChecker(zod)){
+                            zodziaiSuTow[zod].pasikartojimai++;
+                            towCount++;
+                        }
                         if(!zod.empty()){
                             zodziai[zod].pasikartojimai++;                   
                             zodziai[zod].eilutes.push_back(eilutesIndex);     
@@ -52,7 +58,7 @@ string pasirinktiFaila(){
             #endif
             ifstream tempFail("temp.txt");
             vector<string> failuPav;
-            std::unordered_set<string> nenorimiFailai = {"rezultatai.txt", "temp.txt", "link_endings.txt", "nuorodos.txt", "cross-reference.txt"};
+            std::unordered_set<string> nenorimiFailai = {"rezultatai.txt", "temp.txt", "link_endings.txt", "nuorodos.txt", "cross-reference.txt", "zodziaiSuTow.txt"};
             string failoPav;
             while(getline(tempFail, failoPav)){
                 if (nenorimiFailai.find(failoPav) == nenorimiFailai.end()) {
@@ -168,6 +174,7 @@ void isvestiFaila(map<string, zodzioInfo>& zodziai, vector<string>& nuorodos){
     std::ofstream failas1("rezultatai.txt");
     std::ofstream failas2("cross-reference.txt");
     std::ofstream failas3("nuorodos.txt");
+    std::ofstream failas4("zodziaiSuTow.txt");
 
     if(!failas1.is_open() || !failas2.is_open() || !failas3.is_open()) {
         std::cerr << "Nepavyko atidaryti rezultatų failo rašymui." << std::endl;
@@ -198,9 +205,24 @@ void isvestiFaila(map<string, zodzioInfo>& zodziai, vector<string>& nuorodos){
         failas3 << nuoroda << endl;
     }
 
+    failas4 << "ŽODŽIAI SU TOW" << endl;
+    for (const auto& i : zodziaiSuTow) {
+        failas4 << i.second.pasikartojimai << "\t" << i.first << "\t";
+        failas4 << endl;
+    }
+
+    failas4 << endl << "Iš viso žodžių su \"tow\": " << towCount << endl;
+
     failas1.close();
     failas2.close();
     failas3.close();
+    failas4.close();
+}
+
+bool towChecker(const string& zod){
+    string zodzisLower = zod;
+    std::transform(zodzisLower.begin(), zodzisLower.end(), zodzisLower.begin(), ::tolower);
+    return zodzisLower.find("tow") != string::npos;
 }
 
 
